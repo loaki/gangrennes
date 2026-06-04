@@ -1,17 +1,49 @@
-# Minimal Actix Editable Board
+# La Gangrennes
 
-A small minimalist website built with Rust + Actix, containerized with Docker Compose.
+Rust backend for a small blog stack with SQLite and Docker Compose.
 
-## Features
+## Architecture
 
-- Blank minimalist board
-- Edit toggle button
-- Editing tools:
-  - Move elements
-  - Add text elements
-  - Draw freehand strokes
-- All created elements are movable
-- Responsive layout for mobile and desktop
+Minimal and feature-oriented layout:
+
+```text
+src/
+	domain/
+		auth.rs
+		posts.rs
+	http/
+		handlers.rs
+		router.rs
+		views.rs
+	infra/
+		db.rs
+	config.rs
+	error.rs
+	state.rs
+	lib.rs
+	main.rs
+
+migrations/
+	0001_init.sql
+	0002_add_modification_date_and_triggers.sql
+```
+
+## What is in place
+
+- Axum HTTP server with server-side sessions.
+- SQLite storage with WAL and foreign keys enabled.
+- SQL migrations loaded from `migrations/*.sql` at startup.
+- Argon2 password hashing.
+- Minimal HTML templates for `/`, `/login`, `/new`, `/pinned`, `/calendar`, and `/profile`.
+- Docker Compose and a multi-stage Dockerfile.
+
+## Run locally
+
+```bash
+cargo run
+```
+
+On startup, migrations are applied automatically.
 
 ## Run with Docker Compose
 
@@ -19,32 +51,45 @@ A small minimalist website built with Rust + Actix, containerized with Docker Co
 docker compose up --build
 ```
 
-Open: http://localhost:8080
+## Migration workflow
 
-## Faster Iteration
-
-### 1) Faster rebuilds (default compose)
-
-The Dockerfile is cache-optimized so changes under `static/` do not trigger a Rust recompile.
+Install CLI once:
 
 ```bash
-docker compose up -d --build
+cargo install sqlx-cli --no-default-features --features sqlite
 ```
 
-### 2) Instant frontend changes (no rebuild)
-
-Use the dev override to bind-mount `static/` into the container.
+Create a migration:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+sqlx migrate add add_profile_table
 ```
 
-After that, edits in `static/` are visible on refresh without rebuilding.
+Run migrations manually (optional because app startup also runs them):
 
-## Controls
+```bash
+sqlx migrate run --database-url sqlite://data/gangrennes.sqlite3
+```
 
-- Click **Edit** to enter edit mode.
-- Use **Move** to drag elements by their handle.
-- Use **Text** then tap/click the board to add editable text.
-- Use **Draw** then drag on empty board space to create a drawing.
-- Use **Clear** to remove all elements while in edit mode.
+Revert last migration:
+
+```bash
+sqlx migrate revert --database-url sqlite://data/gangrennes.sqlite3
+```
+
+### Example: `modification_date` + triggers
+
+See `migrations/0002_add_modification_date_and_triggers.sql` for:
+
+- adding `modification_date` to `users` and `sessions`
+- backfilling from `created_at`
+- trigger-based automatic update on row modification
+- same trigger behavior for `posts`
+
+## Security notes
+
+- Passwords are never stored in plaintext.
+- Session cookies are `HttpOnly` and `SameSite=Lax`.
+- SQLite is configured with WAL, foreign keys, and a busy timeout.
+- Login and register bodies are capped to a small size.
+- Set `COOKIE_SECURE=true` when serving behind HTTPS.

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_name }} - new</title>
+    {% include "style.html" %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body.new-page {
+            background: none;
+            position: relative;
+        }
+
+        body.new-page::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.58)),
+                url('/assets/background-mobile.webp');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        @media (min-width: 901px) {
+            body.new-page::before {
+                background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)),
+                    url('/assets/background-desktop.webp');
+            }
+        }
+
+        .flatpickr-calendar {
+            background: var(--paper);
+            border-color: var(--line);
+            box-shadow: 0 4px 12px rgba(33, 24, 16, 0.1);
+        }
+
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange,
+        .flatpickr-day.selected:focus {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .flatpickr-day:hover,
+        .flatpickr-day:focus {
+            background: var(--line);
+        }
+
+        .flatpickr-current-month {
+            color: var(--ink);
+        }
+
+        .flatpickr-monthDropdown-months {
+            background: var(--paper);
+        }
+
+        input.flatpickr {
+            cursor: pointer;
+        }
+
+        .events-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .event-row {
+            display: grid;
+            grid-template-columns: 132px 80px minmax(180px, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Balboa', Verdana, sans-serif;
+            text-transform: none;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: geometricPrecision;
+        }
+
+        .event-row:last-child {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .event-dates {
+            display: grid;
+            gap: 4px;
+            font-size: 15px;
+            line-height: 1.2;
+            letter-spacing: 0;
+            color: #f7f4ef;
+        }
+
+        .event-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .event-thumb.placeholder {
+            border: 0;
+            background: transparent;
+        }
+
+        .event-title {
+            margin: 0;
+            font-size: 31px;
+            line-height: 1.1;
+            letter-spacing: 0;
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .event-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-self: end;
+        }
+
+        .event-link {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .event-link:hover,
+        .event-link:focus-visible {
+            opacity: 0.92;
+            outline: none;
+        }
+
+        .event-actions form {
+            margin: 0;
+        }
+
+        .event-action-input {
+            width: 80px;
+            height: 80px;
+            display: block;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+
+        .event-action-input:hover,
+        .event-action-input:focus-visible {
+            opacity: 1;
+            outline: none;
+            transform: scale(1.03);
+        }
+
+        @media (max-width: 980px) {
+            .event-row {
+                grid-template-columns: 104px 64px minmax(120px, 1fr);
+                align-items: center;
+                gap: 8px;
+            }
+
+            .event-actions {
+                grid-column: 1 / -1;
+                justify-self: start;
+                flex-wrap: wrap;
+            }
+
+            .event-thumb {
+                width: 64px;
+                height: 64px;
+            }
+
+            .event-title {
+                font-size: 24px;
+            }
+
+            .event-action-input {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+
+<body class="new-page">
+    <div class="shell">
+        <header class="site-header">
+            <a href="/" aria-label="Home">
+                <img class="site-logo" src="/assets/gangrennes.png" alt="Gangrennes">
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a class="site-link" href="/pinned">pinned</a>
+                <a class="site-link active" href="/new">new</a>
+                <a class="site-link" href="/calendar">calendar</a>
+                <a class="site-link" href="/profile">profile</a>
+            </nav>
+        </header>
+
+        <main class="panel stack with-site-header">
+            {% if show_create_controls %}
+            <div class="symbol-row">
+                <form class="symbol-row controls" method="get" action="/new">
+                    <details class="icon-dropdown">
+                        <summary class="symbol control-icon" aria-label="Filter options">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M4 6h16" />
+                                <path d="M7 12h10" />
+                                <path d="M10 18h4" />
+                            </svg>
+                        </summary>
+                        <div class="dropdown-panel">
+                            <select name="filter">
+                                {% for option in filter_options %}
+                                <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{
+                                    option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </details>
+
+                    <details class="icon-dropdown">
+                        <summary class="symbol control-icon" aria-label="Sort options">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M7 6h10" />
+                                <path d="M9 12h6" />
+                                <path d="M11 18h2" />
+                            </svg>
+                        </summary>
+                        <div class="dropdown-panel">
+                            <select name="sort">
+                                {% for option in sort_options %}
+                                <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{
+                                    option.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </details>
+
+                    <button class="symbol control-submit" type="submit" aria-label="Apply filter and sort">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 12l4 4L19 6" />
+                        </svg>
+                    </button>
+                </form>
+
+                <div class="create-toggle-wrap">
+                    <details class="create-toggle" {% if error_message.is_some() %}open{% endif %}>
+                        <summary class="button symbol-add" aria-label="Create a new post">+</summary>
+                        <section id="create-post" class="stack create-panel">
+                            <h2 style="margin:0;">Create post</h2>
+                            <form class="grid" method="post" action="/new" enctype="multipart/form-data">
+                                <input type="hidden" name="filter" value="{{ selected_filter }}">
+                                <input type="hidden" name="sort" value="{{ selected_sort }}">
+
+                                <div class="field">
+                                    <label for="title">Title</label>
+                                    <input id="title" name="title" required maxlength="160">
+                                </div>
+
+                                <div class="field">
+                                    <label for="image">Image</label>
+                                    <input id="image" name="image" type="file"
+                                        accept="image/png,image/jpeg,image/webp,image/gif">
+                                </div>
+
+                                <div class="field">
+                                    <label for="description">Description</label>
+                                    <textarea id="description" name="description" required maxlength="6000"></textarea>
+                                </div>
+
+                                <div class="date-grid">
+                                    <div class="field">
+                                        <label for="start_date">Start date (optional)</label>
+                                        <input id="start_date" class="flatpickr" type="text" name="start_date"
+                                            placeholder="DD/MM/YYYY">
+                                    </div>
+                                    <div class="field">
+                                        <label for="end_date">End date (optional)</label>
+                                        <input id="end_date" class="flatpickr" type="text" name="end_date"
+                                            placeholder="DD/MM/YYYY">
+                                    </div>
+                                </div>
+
+                                <button type="submit">Create</button>
+                            </form>
+                        </section>
+                    </details>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if error_message.is_some() %}
+            <p class="notice">{{ error_message.as_ref().unwrap() }}</p>
+            {% endif %}
+
+            <section class="stack posts-feed">
+                <h2 style="margin:0;">Events</h2>
+
+                {% if posts.len() == 0 %}
+                <p class="small" style="margin:0;">No posts for current filter.</p>
+                {% else %}
+                <div class="events-list">
+                    {% for post in posts %}
+                    <article class="event-row">
+                        <a class="event-link" href="/posts/{{ post.id }}">
+                            <div class="event-dates">
+                                <span>{{ post.start_date }}</span>
+                                <span>{{ post.end_date }}</span>
+                            </div>
+                        </a>
+
+                        {% if post.image.len() > 0 %}
+                        <a class="event-link" href="/posts/{{ post.id }}">
+                            <img class="event-thumb" src="{{ post.image }}" alt="{{ post.title }}">
+                        </a>
+                        {% else %}
+                        <a class="event-link" href="/posts/{{ post.id }}">
+                            <div class="event-thumb placeholder" aria-hidden="true"></div>
+                        </a>
+                        {% endif %}
+
+                        <a class="event-link" href="/posts/{{ post.id }}">
+                            <h3 class="event-title">{{ post.title }}</h3>
+                        </a>
+
+                        <div class="event-actions">
+                            <form method="post" action="/posts/{{ post.id }}/pin">
+                                <input type="hidden" name="tab" value="{{ current_tab }}">
+                                <input type="hidden" name="filter" value="{{ selected_filter }}">
+                                <input type="hidden" name="sort" value="{{ selected_sort }}">
+                                <input type="hidden" name="pinned" value="{% if post.pinned %}0{% else %}1{% endif %}">
+                                <input class="event-action-input" type="image"
+                                    src="{% if post.pinned %}/assets/unpin.svg{% else %}/assets/pin.svg{% endif %}"
+                                    alt="Pin or unpin" aria-label="Pin or unpin">
+                            </form>
+
+                            <form method="post" action="/posts/{{ post.id }}/reaction">
+                                <input type="hidden" name="tab" value="{{ current_tab }}">
+                                <input type="hidden" name="filter" value="{{ selected_filter }}">
+                                <input type="hidden" name="sort" value="{{ selected_sort }}">
+                                <input type="hidden" name="reaction" value="going">
+                                <input class="event-action-input" type="image"
+                                    src="{% if post.going %}/assets/going_checked.svg{% else %}/assets/going.svg{% endif %}"
+                                    alt="Going" aria-label="Going">
+                            </form>
+
+                            <form method="post" action="/posts/{{ post.id }}/reaction">
+                                <input type="hidden" name="tab" value="{{ current_tab }}">
+                                <input type="hidden" name="filter" value="{{ selected_filter }}">
+                                <input type="hidden" name="sort" value="{{ selected_sort }}">
+                                <input type="hidden" name="reaction" value="not_going">
+                                <input class="event-action-input" type="image"
+                                    src="{% if post.not_going %}/assets/notgoing_checked.svg{% else %}/assets/notgoing.svg{% endif %}"
+                                    alt="Not going" aria-label="Not going">
+                            </form>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Initialize date pickers
+        flatpickr("#start_date", {
+            dateFormat: "d/m/Y",
+            altFormat: "d/m/Y",
+            altInput: false,
+            allowInput: true,
+            mode: "single",
+            placeholder: "DD/MM/YYYY",
+        });
+
+        flatpickr("#end_date", {
+            dateFormat: "d/m/Y",
+            altFormat: "d/m/Y",
+            altInput: false,
+            allowInput: true,
+            mode: "single",
+            placeholder: "DD/MM/YYYY",
+        });
+
+        function updateActionIcons(form) {
+            const actionContainer = form.closest('.event-actions');
+            if (!actionContainer) return;
+
+            if (form.action.includes('/pin')) {
+                const pinValueInput = form.querySelector('input[name="pinned"]');
+                const pinImageInput = form.querySelector('.event-action-input');
+                if (!pinValueInput || !pinImageInput) return;
+
+                const nowPinned = pinValueInput.value === '1';
+                pinImageInput.src = nowPinned ? '/assets/unpin.svg' : '/assets/pin.svg';
+                pinValueInput.value = nowPinned ? '0' : '1';
+                return;
+            }
+
+            if (form.action.includes('/reaction')) {
+                const reactionInput = form.querySelector('input[name="reaction"]');
+                if (!reactionInput) return;
+
+                const goingHidden = actionContainer.querySelector('input[name="reaction"][value="going"]');
+                const notGoingHidden = actionContainer.querySelector('input[name="reaction"][value="not_going"]');
+
+                const goingImg = goingHidden ? goingHidden.form.querySelector('.event-action-input') : null;
+                const notGoingImg = notGoingHidden ? notGoingHidden.form.querySelector('.event-action-input') : null;
+
+                if (reactionInput.value === 'going') {
+                    const wasGoingChecked = goingImg && goingImg.src.includes('going_checked.svg');
+                    if (wasGoingChecked) {
+                        if (goingImg) goingImg.src = '/assets/going.svg';
+                        if (notGoingImg) notGoingImg.src = '/assets/notgoing.svg';
+                    } else {
+                        if (goingImg) goingImg.src = '/assets/going_checked.svg';
+                        if (notGoingImg) notGoingImg.src = '/assets/notgoing.svg';
+                    }
+                }
+
+                if (reactionInput.value === 'not_going') {
+                    const wasNotGoingChecked = notGoingImg && notGoingImg.src.includes('notgoing_checked.svg');
+                    if (wasNotGoingChecked) {
+                        if (goingImg) goingImg.src = '/assets/going.svg';
+                        if (notGoingImg) notGoingImg.src = '/assets/notgoing.svg';
+                    } else {
+                        if (goingImg) goingImg.src = '/assets/going.svg';
+                        if (notGoingImg) notGoingImg.src = '/assets/notgoing_checked.svg';
+                    }
+                }
+            }
+        }
+
+        document.querySelectorAll('.event-actions form').forEach((form) => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                for (const [key, value] of formData.entries()) {
+                    params.append(key, String(value));
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: params,
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Action request failed');
+                    }
+
+                    updateActionIcons(form);
+                } catch (_) {
+                    // Keep the user on the current page; no full-page fallback submit.
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

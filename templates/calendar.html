@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_name }} - Calendar</title>
+    {% include "style.html" %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* ── Calendar layout ─────────────────────────────────────── */
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .calendar-page {
+            gap: 6px;
+        }
+
+        .calendar-page .cal-nav {
+            margin-bottom: 2px;
+        }
+
+        .calendar-page .cal-legend {
+            margin: 0;
+        }
+
+        .cal-nav-link {
+            display: inline-block;
+            line-height: 0;
+            text-decoration: none;
+        }
+
+        .cal-nav-link:hover,
+        .cal-nav-link:focus-visible {
+            opacity: 0.9;
+            outline: none;
+        }
+
+        .cal-nav-icon {
+            width: 80px;
+            height: 80px;
+            display: block;
+        }
+
+        .cal-month-label {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .cal-grid-wrap {
+            width: 100%;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+
+        .cal-header-cell {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            padding: 4px 3px 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .cal-cell {
+            min-height: 68px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cal-cell.empty {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .cal-day-num {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 1px;
+            align-self: flex-start;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .cal-cell.today .cal-day-num {
+            background: var(--black);
+            color: #fff;
+            border-radius: 999px;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Event chips ─────────────────────────────────────────── */
+        .cal-event {
+            display: block;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-decoration: none;
+            cursor: default;
+        }
+
+        /* No reaction – soft grey */
+        .cal-event.none {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ece9e3;
+        }
+
+        /* Going – green */
+        .cal-event.going {
+            background: #86b994;
+            color: #18261d;
+        }
+
+        /* Not going – red */
+        .cal-event.not_going {
+            background: #cc5d4c;
+            color: #2c0f0b;
+        }
+
+        /* ── Legend ──────────────────────────────────────────────── */
+        .cal-legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .cal-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .cal-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .cal-legend-dot.none {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .cal-legend-dot.going {
+            background: #86b994;
+        }
+
+        .cal-legend-dot.not_going {
+            background: #cc5d4c;
+        }
+
+        @media (max-width: 760px) {
+            .calendar-page {
+                gap: 4px;
+            }
+
+            .cal-nav {
+                gap: 8px;
+                margin-bottom: 0;
+            }
+
+            .cal-nav-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .cal-month-label {
+                flex: 1;
+                text-align: center;
+                font-size: 16px;
+            }
+
+            .cal-legend {
+                gap: 8px;
+            }
+
+            .cal-legend-item {
+                font-size: 12px;
+            }
+
+            .cal-grid-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 4px;
+            }
+
+            .cal-grid {
+                min-width: 640px;
+            }
+
+            .cal-cell {
+                min-height: 56px;
+                padding: 3px;
+                gap: 2px;
+            }
+
+            .cal-header-cell {
+                font-size: 11px;
+                padding: 3px 2px 4px;
+            }
+
+            .cal-day-num {
+                font-size: 11px;
+                min-width: 18px;
+            }
+
+            .cal-cell.today .cal-day-num {
+                width: 18px;
+                height: 18px;
+            }
+
+            .cal-event {
+                font-size: 10px;
+                padding: 1px 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a href="/" aria-label="Home">
+                <img class="site-logo" src="/assets/gangrennes.png" alt="Gangrennes">
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a class="site-link" href="/pinned">pinned</a>
+                <a class="site-link" href="/new">new</a>
+                <a class="site-link active" href="/calendar">calendar</a>
+                <a class="site-link" href="/profile">profile</a>
+            </nav>
+        </header>
+
+        <main class="panel stack with-site-header calendar-page">
+            <!-- Navigation + month title -->
+            <div class="cal-nav">
+                <a class="cal-nav-link" href="/calendar?ym={{ prev_ym }}" aria-label="Previous month">
+                    <img class="cal-nav-icon" src="/assets/prev.svg" alt="Previous month">
+                </a>
+                <span class="cal-month-label">{{ month_label }}</span>
+                <a class="cal-nav-link" href="/calendar?ym={{ next_ym }}" aria-label="Next month">
+                    <img class="cal-nav-icon" src="/assets/next.svg" alt="Next month">
+                </a>
+            </div>
+
+            <!-- Legend -->
+            <div class="cal-legend">
+                <div class="cal-legend-item">
+                    <span class="cal-legend-dot none"></span> No reaction
+                </div>
+                <div class="cal-legend-item">
+                    <span class="cal-legend-dot going"></span> Going
+                </div>
+                <div class="cal-legend-item">
+                    <span class="cal-legend-dot not_going"></span> Not going
+                </div>
+            </div>
+
+            <!-- Calendar grid -->
+            <div class="cal-grid-wrap">
+                <div class="cal-grid">
+                    <!-- Week-day headers -->
+                    <div class="cal-header-cell">Mon</div>
+                    <div class="cal-header-cell">Tue</div>
+                    <div class="cal-header-cell">Wed</div>
+                    <div class="cal-header-cell">Thu</div>
+                    <div class="cal-header-cell">Fri</div>
+                    <div class="cal-header-cell">Sat</div>
+                    <div class="cal-header-cell">Sun</div>
+
+                    {% for cell in days %}
+                    {% if cell.day == 0 %}
+                    <div class="cal-cell empty"></div>
+                    {% else %}
+                    <div class="cal-cell">
+                        <span class="cal-day-num">{{ cell.day }}</span>
+                        {% for ev in cell.events %}
+                        <a class="cal-event {{ ev.reaction }}" href="/posts/{{ ev.id }}"
+                            title="{{ ev.title }}{% if ev.end_date != "" %} → {{ ev.end_date }}{% endif %}">
+                            {{ ev.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -2,7 +2,21 @@
 name = "gangrennes"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.88"
 
 [dependencies]
-actix-web = "=4.11.0"
-actix-files = "=0.6.8"
+argon2 = "0.5"
+askama = "0.13"
+axum = { version = "0.8", features = ["multipart"] }
+axum-extra = { version = "0.10", features = ["cookie"] }
+base64 = "0.22"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio-rustls", "migrate"] }
+thiserror = "2"
+time = "0.3"
+tokio = { version = "1", features = ["fs", "macros", "rt-multi-thread", "signal"] }
+tower-http = { version = "0.6", features = ["compression-gzip", "fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_name }} - {{ post.title }}</title>
+    {% include "style.html" %}
+    <style>
+        .detail-shell {
+            display: grid;
+            gap: 14px;
+        }
+
+        .detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: lowercase;
+        }
+
+        .detail-title {
+            margin: 0;
+            font-size: clamp(30px, 4vw, 48px);
+            line-height: 1;
+            font-family: 'Balboa', Verdana, sans-serif;
+        }
+
+        .detail-meta {
+            display: grid;
+            gap: 4px;
+            font-family: 'Balboa', Verdana, sans-serif;
+            font-size: 16px;
+            line-height: 1.25;
+        }
+
+        .detail-image {
+            width: min(560px, 100%);
+            height: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0;
+            display: block;
+        }
+
+        .detail-description {
+            margin: 0;
+            white-space: pre-wrap;
+            line-height: 1.65;
+            font-size: 16px;
+            max-width: 980px;
+        }
+
+        .detail-grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        }
+
+        .detail-kv {
+            display: grid;
+            gap: 2px;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .detail-k {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 11px;
+        }
+
+        .detail-v {
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a href="/" aria-label="Home">
+                <img class="site-logo" src="/assets/gangrennes.png" alt="Gangrennes">
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a class="site-link" href="/pinned">pinned</a>
+                <a class="site-link active" href="/new">new</a>
+                <a class="site-link" href="/calendar">calendar</a>
+                <a class="site-link" href="/profile">profile</a>
+            </nav>
+        </header>
+
+        <main class="panel stack with-site-header">
+            <section class="detail-shell">
+                <div class="detail-head">
+                    <a class="back-link" href="/new">back to events</a>
+                    <p class="small" style="margin:0;">signed in as {{ username }}</p>
+                </div>
+
+                <h1 class="detail-title">{{ post.title }}</h1>
+
+                <div class="detail-meta">
+                    <span>{{ post.start_date }}</span>
+                    <span>{{ post.end_date }}</span>
+                    <span>{{ post.author_name }}</span>
+                </div>
+
+                {% if post.image.len() > 0 %}
+                <img class="detail-image" src="{{ post.image }}" alt="{{ post.title }}">
+                {% endif %}
+
+                <p class="detail-description">{{ post.description }}</p>
+
+                <div class="detail-grid">
+                    <div class="detail-kv">
+                        <span class="detail-k">Post id</span>
+                        <span class="detail-v">{{ post.id }}</span>
+                    </div>
+                    <div class="detail-kv">
+                        <span class="detail-k">Pinned</span>
+                        <span class="detail-v">{% if post.pinned %}yes{% else %}no{% endif %}</span>
+                    </div>
+                    <div class="detail-kv">
+                        <span class="detail-k">Reaction</span>
+                        <span class="detail-v">{% if post.going %}going{% elif post.not_going %}not going{% else
+                            %}none{% endif %}</span>
+                    </div>
+                    <div class="detail-kv">
+                        <span class="detail-k">Created (unix)</span>
+                        <span class="detail-v">{{ creation_date }}</span>
+                    </div>
+                    <div class="detail-kv">
+                        <span class="detail-k">Updated (unix)</span>
+                        <span class="detail-v">{{ modification_date }}</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

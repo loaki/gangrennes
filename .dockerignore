@@ -1,3 +1,4 @@
-target
-.git
-.gitignore
+/target
+/.git
+/.env
+/data
