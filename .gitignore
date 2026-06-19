@@ -1,4 +1,2 @@
 /target
-/.env
-/data/*.sqlite3
-/data/*.db
+.env

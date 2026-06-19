@@ -1,1 +1,0 @@
-// Pages are rendered directly by handlers.
